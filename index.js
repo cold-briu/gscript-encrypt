@@ -21,10 +21,10 @@ function onOpen()
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var menuEntries = 
   [ 
-    {name: "Encrypt", functionName: "mEncrypt"},
-    {name: "Decrypt", functionName: "mDecrypt"} 
+    {name: "Encriptar", functionName: "mEncrypt"},
+    {name: "Revelar", functionName: "mDecrypt"} 
   ];
-  ss.addMenu("Security", menuEntries);
+  ss.addMenu("!! Seguridad", menuEntries);
 }
 
 
