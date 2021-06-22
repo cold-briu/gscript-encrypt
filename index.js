@@ -31,64 +31,55 @@ function onOpen() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var menuEntries =
     [
-      { name: config.menu.encrypt, functionName: "mEncrypt" },
-      { name: config.menu.decrypt, functionName: "mDecrypt" }
+      { name: config.menu.encrypt, functionName: "encryptActiveRange" },
+      { name: config.menu.decrypt, functionName: "decryptActiveRange" }
     ];
   ss.addMenu(config.menu.name, menuEntries);
 }
 
-function getPrompt() {
-  const sKey = Browser.inputBox(config.prompt.message);
+function encryptActiveRange() {
+  handleMenu(encrypt)
+}
 
-  if ((sKey == '') || (sKey == config.prompt.cancelKey)) {
+function decryptActiveRange() {
+  handleMenu(decrypt)
+}
+
+function handleMenu(callback) {
+  let secretKey = getPrompt()
+  if (!secretKey) {
+    return false
+  }
+  mapRange(withKey(callback, secretKey))
+}
+
+function getPrompt() {
+  const secretKey = Browser.inputBox(config.prompt.message);
+  if ((secretKey == '') || (secretKey == config.prompt.cancelKey)) {
     Browser.msgBox(config.prompt.error);
     return false;
   }
-  return sKey
+  return secretKey
 }
 
-
-function mEncrypt() {
-
-  let sKey = getPrompt()
-
-  if (!sKey) {
-    return false
+function withKey(callback, key) {
+  return function (data) {
+    callback(data, key)
   }
+}
 
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var range = SpreadsheetApp.getActiveSheet().getActiveRange();
+function mapRange(callback) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const range = sheet.getActiveRange();
 
   for (var i = range.getColumnIndex(); i <= range.getLastColumn(); ++i) {
     for (var j = range.getRowIndex(); j <= range.getLastRow(); ++j) {
-      sheet.getRange(j, i).setValue(encrypt(sheet.getRange(j, i).getValue(), sKey));
+      const currentCell = sheet.getRange(j, i)
+      const parsedValue = callback(currentCell.getValue())
+      currentCell.setValue(parsedValue);
     }
   }
 }
-
-
-
-
-
-function mDecrypt() {
-  let sKey = getPrompt()
-
-  if (!sKey) {
-    return false
-  }
-
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var range = SpreadsheetApp.getActiveSheet().getActiveRange();
-
-  for (var i = range.getColumnIndex(); i <= range.getLastColumn(); ++i) {
-    for (var j = range.getRowIndex(); j <= range.getLastRow(); ++j) {
-      sheet.getRange(j, i).setValue(decrypt(sheet.getRange(j, i).getValue(), sKey));
-    }
-  }
-}
-
-
-
 
 
 // remix compatible with Crypt::Blowfish
