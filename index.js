@@ -64,7 +64,7 @@ function getPrompt() {
 
 function withKey(callback, key) {
   return function (data) {
-    callback(data, key)
+    return callback(data, key)
   }
 }
 
